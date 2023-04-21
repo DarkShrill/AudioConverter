@@ -7,3 +7,6 @@ The project consists of a program that converts WAV audio files to raw PCM forma
 ![](https://github.com/DarkShrill/AudioConverter/blob/master/stuff/audio_converter.PNG)
 
 The program takes audio files in WAV format as input. The user can choose the sampling frequency from three available options (8000, 16000, 44100 Hz). The audio file then undergoes a resampling process, which adjusts the sample rate of the input file to the user's choice. Next, the file is converted to raw PCM format G711.
+
+# ATTENTION
+Fisrt of all, de-zip the ffpeg.zip folder!
