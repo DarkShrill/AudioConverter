@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/other">
+        <file>fonts/GothamMedium.ttf</file>
+        <file>fonts/GothamLight.ttf</file>
+        <file>fonts/GothamBook.ttf</file>
+    </qresource>
+</RCC>
