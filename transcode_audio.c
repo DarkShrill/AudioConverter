@@ -54,6 +54,7 @@
 #define OUTPUT_CHANNELS 1
 //#define OUTPUT_CHANNELS 2
 
+unsigned long FRAME__SIZE = 128; // WAV
 
 unsigned char *out_buffer;
 unsigned long *out_buffer_len;
@@ -190,7 +191,7 @@ static int open_output_file(const char *filename,
 
     /* Find the encoder to be used by its name. */
     //if (!(output_codec = avcodec_find_encoder(AV_CODEC_ID_AAC))) {
-    if (!(output_codec = avcodec_find_encoder(AV_CODEC_ID_PCM_MULAW))) {
+    if (!(output_codec = avcodec_find_encoder(AV_CODEC_ID_PCM_MULAW))) {//AV_CODEC_ID_PCM_MULAW
         fprintf(stderr, "Could not find an AAC encoder.\n");
         goto cleanup;
     }
@@ -217,10 +218,11 @@ static int open_output_file(const char *filename,
     avctx->sample_rate    = out_sampling_rate;
     avctx->sample_fmt     = output_codec->sample_fmts[0];
     avctx->bit_rate       = OUTPUT_BIT_RATE;
-    avctx->frame_size     = 128;
+    avctx->frame_size     = FRAME__SIZE;
 
     /* Allow the use of the experimental AAC encoder. */
     avctx->strict_std_compliance = FF_COMPLIANCE_EXPERIMENTAL;
+
 
     /* Set the sample rate for the container. */
     stream->time_base.den = input_codec_context->sample_rate;
@@ -492,7 +494,7 @@ static int convert_samples(const uint8_t **input_data,
 
 
     dst_nb_samples = av_rescale_rnd(swr_get_delay(resample_context, 44100) +
-                                    128, out_sampling_rate, 44100, AV_ROUND_UP);
+                                    FRAME__SIZE, out_sampling_rate, 44100, AV_ROUND_UP);
 
 
     *dest_n_of_sample = dst_nb_samples;
@@ -809,6 +811,10 @@ int convert_audio_and_save_wav(const char *in_file_name,
     int ret = AVERROR_EXIT;
 
 
+    if(strstr(in_file_name, ".mp3")){
+        FRAME__SIZE = 1024; //PER MP3
+    }
+
 
     out_buffer        = out_buff;
     out_buffer_len    = out_buff_len;
@@ -827,7 +833,8 @@ int convert_audio_and_save_wav(const char *in_file_name,
                          &output_format_context, &output_codec_context))
         goto cleanup;
 
-    output_codec_context->frame_size = 128;
+
+    output_codec_context->frame_size = FRAME__SIZE;
 
 
     if (init_resampler(input_codec_context, output_codec_context,
@@ -934,6 +941,9 @@ int convert_audio(const char *in_file_name,
     int ret = AVERROR_EXIT;
 
 
+    if(strstr(in_file_name, ".mp3")){
+        FRAME__SIZE = 1024; //PER MP3
+    }
 
     out_buffer        = out_buff;
     out_buffer_len    = out_buff_len;
@@ -952,7 +962,7 @@ int convert_audio(const char *in_file_name,
                          &output_format_context, &output_codec_context))
         goto cleanup;
 
-    output_codec_context->frame_size = 128;
+    output_codec_context->frame_size = FRAME__SIZE;
 
 
     if (init_resampler(input_codec_context, output_codec_context,

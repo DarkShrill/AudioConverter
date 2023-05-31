@@ -41,7 +41,7 @@ void AudioFilesDecoder::onDecodeFiles(QString file_raw, QString sample_rate, boo
             QByteArray      *out_buff;
             unsigned long   out_buff_len;
             uint32_t        size_for_g711 = 0;
-            uint16_t        * buff_out;
+            int16_t         * buff_out;
             uint32_t        val = 0;
             QString         tmp_str;
             QString         path_no_name;
@@ -84,10 +84,11 @@ void AudioFilesDecoder::onDecodeFiles(QString file_raw, QString sample_rate, boo
 
             size_for_g711 = (out_buff_len);
             audio_buffer.resize(size_for_g711); // per G711
-            buff_out = (uint16_t *)&out_buff[0];
+            buff_out = (int16_t *)&out_buff[0];
 
             for(c1=0; c1 < size_for_g711; c1++){
-                audio_buffer[c1] = __af_linear2ulaw(out_buff->constData()[c1]); // lo converto in G711
+                //audio_buffer[c1] = __af_linear2ulaw(buff_out[c1]); // lo converto in G711
+                audio_buffer[c1] = out_buff->constData()[c1];
             }
 
 
