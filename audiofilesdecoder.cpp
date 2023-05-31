@@ -38,7 +38,7 @@ void AudioFilesDecoder::onDecodeFiles(QString file_raw, QString sample_rate, boo
             QByteArray      temp_buff;
             QByteArray      temp_buff_wav;
             uint32_t        c1;
-            unsigned char   *out_buff;
+            QByteArray      *out_buff;
             unsigned long   out_buff_len;
             uint32_t        size_for_g711 = 0;
             uint16_t        * buff_out;
@@ -52,7 +52,8 @@ void AudioFilesDecoder::onDecodeFiles(QString file_raw, QString sample_rate, boo
 
             in_file_name    = temp_buff.data();
 
-            out_buff        = (unsigned char *)malloc(90*1024*1024);
+            out_buff        = new QByteArray();
+            out_buff->resize(90*1024*1024);
 
 
 
@@ -72,26 +73,25 @@ void AudioFilesDecoder::onDecodeFiles(QString file_raw, QString sample_rate, boo
             try{
 
                 if(!also_wav_file)
-                    convert_audio(in_file_name, sample_rate.toUInt() ,out_buff, &out_buff_len);
+                    convert_audio(in_file_name, sample_rate.toUInt() , (unsigned char *)out_buff->constData(), &out_buff_len);
                 else
-                    convert_audio_and_save_wav(in_file_name, in_file_name_wav, sample_rate.toUInt() ,out_buff, &out_buff_len);
+                    convert_audio_and_save_wav(in_file_name, in_file_name_wav, sample_rate.toUInt() , (unsigned char *)out_buff->constData(), &out_buff_len);
 
             } catch (...) {
                 qDebug() << "Exception on: " << file_name;
             }
 
 
-            size_for_g711 = (out_buff_len/2);
+            size_for_g711 = (out_buff_len);
             audio_buffer.resize(size_for_g711); // per G711
             buff_out = (uint16_t *)&out_buff[0];
 
             for(c1=0; c1 < size_for_g711; c1++){
-                audio_buffer[c1] = __af_linear2ulaw(*buff_out); // lo converto in G711
-                buff_out++;
+                audio_buffer[c1] = __af_linear2ulaw(out_buff->constData()[c1]); // lo converto in G711
             }
 
 
-            writeFile(path_no_name + "/"+file_name+"_"+sample_rate+"_Hz.pcm", (const uint8_t *)audio_buffer.data(), size_for_g711);
+            writeFile(path_no_name + "/"+file_name+"_"+sample_rate+"_Hz.pcm", (const uint8_t *)audio_buffer.constData(), size_for_g711);
 
             free(out_buff);
         }
